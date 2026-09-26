@@ -26,36 +26,77 @@ async def get_repositories():
     try:
         from swytchcode_runtime import exec
         import os
-        
+        import json
+
         # Swytchcode expects SWYTCHCODE_TOKEN in env for headless use
         if os.getenv("SWYTCHCODE_API_KEY") and not os.getenv("SWYTCHCODE_TOKEN"):
             os.environ["SWYTCHCODE_TOKEN"] = os.getenv("SWYTCHCODE_API_KEY")
-            
-        # Execute the GitHub list repositories tool via Swytchcode runtime
-        response = exec("github.repository.list", {})
-        
-        # Parse the Swytchcode response which maps to the GitHub API schema
-        result = response.get("repositories", response) if isinstance(response, dict) else response
-        if not isinstance(result, list):
-            result = []
-            
+
+        username = "PankajBaliyan"
+        # MUST be small (e.g. 15) to prevent Swytchcode from truncating the large JSON output.
+        # If truncated, json.loads() fails and it returns an empty array.
+        per_page = 15
+        page = 1
+
+        all_repos = []
+
+        while True:
+            response = exec(
+                "github.repo.get4",
+                {
+                    "username": username,
+                    "per_page": per_page,
+                    "page": page,
+                }
+            )
+
+            result = response if isinstance(response, list) else response.get("data", [])
+            print("result",result)
+
+            if isinstance(result, str):
+                try:
+                    result = json.loads(result)
+                except Exception:
+                    result = []
+
+            if not isinstance(result, list):
+                result = []
+
+            all_repos.extend(result)
+
+            # Last page reached
+            if len(result) < per_page:
+                break
+
+            page += 1
+
         repos = []
-        for r in result:
+        print("all_repos",all_repos)
+        for r in all_repos:
             repos.append({
                 "id": str(r.get("id", "")),
-                "owner": r.get("owner", {}).get("login", "") if isinstance(r.get("owner"), dict) else "",
+                "owner": (
+                    r.get("owner", {}).get("login", "")
+                    if isinstance(r.get("owner"), dict)
+                    else ""
+                ),
                 "name": r.get("name", ""),
                 "fullName": r.get("full_name", ""),
                 "visibility": "private" if r.get("private") else "public",
                 "openIssues": r.get("open_issues_count", 0),
-                "language": r.get("language", "") or "Unknown"
+                "language": r.get("language", "") or "Unknown",
             })
+
         return repos
+
     except Exception as e:
         print(f"Error fetching repos from Swytchcode: {e}")
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail="Failed to fetch repos from Swytchcode")
 
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch repos from Swytchcode"
+        )
 
 @app.post("/api/agent/run")
 def run_agent(request: AgentRequest):

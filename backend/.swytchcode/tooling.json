@@ -2795,6 +2795,1541 @@
       "summary": "List issues assigned to the authenticated user",
       "type": "method"
     },
+    "github.repo.get4": {
+      "desc": "Lists public repositories for the specified user.",
+      "inputs": [
+        {
+          "username": {
+            "LOCATION": "path",
+            "REQUIRED": true,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "type": {
+            "DEFAULT": "owner",
+            "ENUM": [
+              "all",
+              "owner",
+              "member"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "sort": {
+            "DEFAULT": "full_name",
+            "ENUM": [
+              "created",
+              "updated",
+              "pushed",
+              "full_name"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "direction": {
+            "ENUM": [
+              "asc",
+              "desc"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "per_page": {
+            "DEFAULT": 30,
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "page": {
+            "DEFAULT": 1,
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        }
+      ],
+      "integration": "GitHub.github@1.1.4",
+      "method_hash": "80e9afa1bf8ed47b78d9c8ebf4e04fe85df7f7319f95f28d59022f2ee41fb9a3",
+      "output": {
+        "schema": {
+          "items": {
+            "properties": {
+              "allow_forking": {
+                "required": false,
+                "type": "boolean"
+              },
+              "archive_url": {
+                "required": true,
+                "type": "string"
+              },
+              "archived": {
+                "required": false,
+                "type": "boolean"
+              },
+              "assignees_url": {
+                "required": true,
+                "type": "string"
+              },
+              "blobs_url": {
+                "required": true,
+                "type": "string"
+              },
+              "branches_url": {
+                "required": true,
+                "type": "string"
+              },
+              "clone_url": {
+                "required": false,
+                "type": "string"
+              },
+              "code_of_conduct": {
+                "properties": {
+                  "body": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "key": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "name": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "url": {
+                    "required": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "name",
+                  "url",
+                  "html_url"
+                ],
+                "type": "object"
+              },
+              "collaborators_url": {
+                "required": true,
+                "type": "string"
+              },
+              "comments_url": {
+                "required": true,
+                "type": "string"
+              },
+              "commits_url": {
+                "required": true,
+                "type": "string"
+              },
+              "compare_url": {
+                "required": true,
+                "type": "string"
+              },
+              "contents_url": {
+                "required": true,
+                "type": "string"
+              },
+              "contributors_url": {
+                "required": true,
+                "type": "string"
+              },
+              "created_at": {
+                "required": false,
+                "type": "TIMESTAMP"
+              },
+              "custom_properties": {
+                "required": false,
+                "type": "map[STRING]ANY"
+              },
+              "default_branch": {
+                "required": false,
+                "type": "string"
+              },
+              "delete_branch_on_merge": {
+                "required": false,
+                "type": "boolean"
+              },
+              "deployments_url": {
+                "required": true,
+                "type": "string"
+              },
+              "description": {
+                "required": true,
+                "type": "string"
+              },
+              "disabled": {
+                "required": false,
+                "type": "boolean"
+              },
+              "downloads_url": {
+                "required": true,
+                "type": "string"
+              },
+              "events_url": {
+                "required": true,
+                "type": "string"
+              },
+              "fork": {
+                "required": true,
+                "type": "boolean"
+              },
+              "forks": {
+                "required": false,
+                "type": "integer"
+              },
+              "forks_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "forks_url": {
+                "required": true,
+                "type": "string"
+              },
+              "full_name": {
+                "required": true,
+                "type": "string"
+              },
+              "git_commits_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_refs_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_tags_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_url": {
+                "required": false,
+                "type": "string"
+              },
+              "has_discussions": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_downloads": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_issues": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_pages": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_projects": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_pull_requests": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "required": false,
+                "type": "boolean"
+              },
+              "homepage": {
+                "required": false,
+                "type": "string"
+              },
+              "hooks_url": {
+                "required": true,
+                "type": "string"
+              },
+              "html_url": {
+                "required": true,
+                "type": "string"
+              },
+              "id": {
+                "required": true,
+                "type": "integer"
+              },
+              "is_template": {
+                "required": false,
+                "type": "boolean"
+              },
+              "issue_comment_url": {
+                "required": true,
+                "type": "string"
+              },
+              "issue_events_url": {
+                "required": true,
+                "type": "string"
+              },
+              "issues_url": {
+                "required": true,
+                "type": "string"
+              },
+              "keys_url": {
+                "required": true,
+                "type": "string"
+              },
+              "labels_url": {
+                "required": true,
+                "type": "string"
+              },
+              "language": {
+                "required": false,
+                "type": "string"
+              },
+              "languages_url": {
+                "required": true,
+                "type": "string"
+              },
+              "license": {
+                "properties": {
+                  "key": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "name": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "node_id": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "spdx_id": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "url": {
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "merges_url": {
+                "required": true,
+                "type": "string"
+              },
+              "milestones_url": {
+                "required": true,
+                "type": "string"
+              },
+              "mirror_url": {
+                "required": false,
+                "type": "string"
+              },
+              "name": {
+                "required": true,
+                "type": "string"
+              },
+              "network_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "node_id": {
+                "required": true,
+                "type": "string"
+              },
+              "notifications_url": {
+                "required": true,
+                "type": "string"
+              },
+              "open_issues": {
+                "required": false,
+                "type": "integer"
+              },
+              "open_issues_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "owner": {
+                "properties": {
+                  "avatar_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "email": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "events_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "followers_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "following_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "gists_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "gravatar_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "required": true,
+                    "type": "integer"
+                  },
+                  "login": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "name": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "node_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "organizations_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "received_events_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "repos_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "starred_at": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "starred_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "subscriptions_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "type": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "user_view_type": {
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "login",
+                  "id",
+                  "node_id",
+                  "avatar_url",
+                  "gravatar_id",
+                  "url",
+                  "html_url",
+                  "followers_url",
+                  "following_url",
+                  "gists_url",
+                  "starred_url",
+                  "subscriptions_url",
+                  "organizations_url",
+                  "repos_url",
+                  "events_url",
+                  "received_events_url",
+                  "type",
+                  "site_admin"
+                ],
+                "type": "object"
+              },
+              "permissions": {
+                "properties": {
+                  "admin": {
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  "maintain": {
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  "pull": {
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  "push": {
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  "triage": {
+                    "required": false,
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "private": {
+                "required": true,
+                "type": "boolean"
+              },
+              "pull_request_creation_policy": {
+                "required": false,
+                "type": "string"
+              },
+              "pulls_url": {
+                "required": true,
+                "type": "string"
+              },
+              "pushed_at": {
+                "required": false,
+                "type": "TIMESTAMP"
+              },
+              "releases_url": {
+                "required": true,
+                "type": "string"
+              },
+              "role_name": {
+                "required": false,
+                "type": "string"
+              },
+              "security_and_analysis": {
+                "properties": {
+                  "advanced_security": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "code_security": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "dependabot_security_updates": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_ai_detection": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_delegated_alert_dismissal": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_delegated_bypass": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_delegated_bypass_options": {
+                    "properties": {
+                      "reviewers": {
+                        "items": {
+                          "properties": {
+                            "mode": {
+                              "required": false,
+                              "type": "string"
+                            },
+                            "reviewer_id": {
+                              "required": true,
+                              "type": "integer"
+                            },
+                            "reviewer_type": {
+                              "required": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reviewer_id",
+                            "reviewer_type"
+                          ],
+                          "type": "object"
+                        },
+                        "required": false,
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_non_provider_patterns": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "secret_scanning_push_protection": {
+                    "properties": {
+                      "status": {
+                        "required": false,
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "size": {
+                "required": false,
+                "type": "integer"
+              },
+              "ssh_url": {
+                "required": false,
+                "type": "string"
+              },
+              "stargazers_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "stargazers_url": {
+                "required": true,
+                "type": "string"
+              },
+              "statuses_url": {
+                "required": true,
+                "type": "string"
+              },
+              "subscribers_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "subscribers_url": {
+                "required": true,
+                "type": "string"
+              },
+              "subscription_url": {
+                "required": true,
+                "type": "string"
+              },
+              "svn_url": {
+                "required": false,
+                "type": "string"
+              },
+              "tags_url": {
+                "required": true,
+                "type": "string"
+              },
+              "teams_url": {
+                "required": true,
+                "type": "string"
+              },
+              "temp_clone_token": {
+                "required": false,
+                "type": "string"
+              },
+              "topics": {
+                "required": false,
+                "type": "[]STRING"
+              },
+              "trees_url": {
+                "required": true,
+                "type": "string"
+              },
+              "updated_at": {
+                "required": false,
+                "type": "TIMESTAMP"
+              },
+              "url": {
+                "required": true,
+                "type": "string"
+              },
+              "visibility": {
+                "required": false,
+                "type": "string"
+              },
+              "watchers": {
+                "required": false,
+                "type": "integer"
+              },
+              "watchers_count": {
+                "required": false,
+                "type": "integer"
+              },
+              "web_commit_signoff_required": {
+                "required": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "node_id",
+              "name",
+              "full_name",
+              "owner",
+              "private",
+              "html_url",
+              "description",
+              "fork",
+              "url",
+              "archive_url",
+              "assignees_url",
+              "blobs_url",
+              "branches_url",
+              "collaborators_url",
+              "comments_url",
+              "commits_url",
+              "compare_url",
+              "contents_url",
+              "contributors_url",
+              "deployments_url",
+              "downloads_url",
+              "events_url",
+              "forks_url",
+              "git_commits_url",
+              "git_refs_url",
+              "git_tags_url",
+              "issue_comment_url",
+              "issue_events_url",
+              "issues_url",
+              "keys_url",
+              "labels_url",
+              "languages_url",
+              "merges_url",
+              "milestones_url",
+              "notifications_url",
+              "pulls_url",
+              "releases_url",
+              "stargazers_url",
+              "statuses_url",
+              "subscribers_url",
+              "subscription_url",
+              "tags_url",
+              "teams_url",
+              "trees_url",
+              "hooks_url"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "status": 200
+      },
+      "summary": "List repositories for a user",
+      "type": "method"
+    },
+    "github.repo.list": {
+      "desc": "Lists repositories that the authenticated user has explicit permission (`:read`, `:write`, or `:admin`) to access.\n\nThe authenticated user has explicit permission to access repositories they own, repositories where they are a collaborator, and repositories that they can access through an organization membership.",
+      "inputs": [
+        {
+          "visibility": {
+            "DEFAULT": "all",
+            "ENUM": [
+              "all",
+              "public",
+              "private"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "affiliation": {
+            "DEFAULT": "owner,collaborator,organization_member",
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "type": {
+            "DEFAULT": "all",
+            "ENUM": [
+              "all",
+              "owner",
+              "public",
+              "private",
+              "member"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "sort": {
+            "DEFAULT": "full_name",
+            "ENUM": [
+              "created",
+              "updated",
+              "pushed",
+              "full_name"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "direction": {
+            "ENUM": [
+              "asc",
+              "desc"
+            ],
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "per_page": {
+            "DEFAULT": 30,
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "page": {
+            "DEFAULT": 1,
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "since": {
+            "FORMAT": "date-time",
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "TIMESTAMP"
+          }
+        },
+        {
+          "before": {
+            "FORMAT": "date-time",
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "TIMESTAMP"
+          }
+        }
+      ],
+      "integration": "GitHub.github@1.1.4",
+      "method_hash": "65a13fdbf32ac85918299675af8850ac553bff5de33026c966cd7106dcb78c67",
+      "output": {
+        "schema": {
+          "items": {
+            "properties": {
+              "allow_auto_merge": {
+                "required": false,
+                "type": "boolean"
+              },
+              "allow_forking": {
+                "required": false,
+                "type": "boolean"
+              },
+              "allow_merge_commit": {
+                "required": false,
+                "type": "boolean"
+              },
+              "allow_rebase_merge": {
+                "required": false,
+                "type": "boolean"
+              },
+              "allow_squash_merge": {
+                "required": false,
+                "type": "boolean"
+              },
+              "allow_update_branch": {
+                "required": false,
+                "type": "boolean"
+              },
+              "anonymous_access_enabled": {
+                "required": false,
+                "type": "boolean"
+              },
+              "archive_url": {
+                "required": true,
+                "type": "string"
+              },
+              "archived": {
+                "required": true,
+                "type": "boolean"
+              },
+              "assignees_url": {
+                "required": true,
+                "type": "string"
+              },
+              "blobs_url": {
+                "required": true,
+                "type": "string"
+              },
+              "branches_url": {
+                "required": true,
+                "type": "string"
+              },
+              "clone_url": {
+                "required": true,
+                "type": "string"
+              },
+              "code_search_index_status": {
+                "properties": {
+                  "lexical_commit_sha": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "lexical_search_ok": {
+                    "required": false,
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "collaborators_url": {
+                "required": true,
+                "type": "string"
+              },
+              "comments_url": {
+                "required": true,
+                "type": "string"
+              },
+              "commits_url": {
+                "required": true,
+                "type": "string"
+              },
+              "compare_url": {
+                "required": true,
+                "type": "string"
+              },
+              "contents_url": {
+                "required": true,
+                "type": "string"
+              },
+              "contributors_url": {
+                "required": true,
+                "type": "string"
+              },
+              "created_at": {
+                "required": true,
+                "type": "TIMESTAMP"
+              },
+              "default_branch": {
+                "required": true,
+                "type": "string"
+              },
+              "delete_branch_on_merge": {
+                "required": false,
+                "type": "boolean"
+              },
+              "deployments_url": {
+                "required": true,
+                "type": "string"
+              },
+              "description": {
+                "required": true,
+                "type": "string"
+              },
+              "disabled": {
+                "required": true,
+                "type": "boolean"
+              },
+              "downloads_url": {
+                "required": true,
+                "type": "string"
+              },
+              "events_url": {
+                "required": true,
+                "type": "string"
+              },
+              "fork": {
+                "required": true,
+                "type": "boolean"
+              },
+              "forks": {
+                "required": true,
+                "type": "integer"
+              },
+              "forks_count": {
+                "required": true,
+                "type": "integer"
+              },
+              "forks_url": {
+                "required": true,
+                "type": "string"
+              },
+              "full_name": {
+                "required": true,
+                "type": "string"
+              },
+              "git_commits_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_refs_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_tags_url": {
+                "required": true,
+                "type": "string"
+              },
+              "git_url": {
+                "required": true,
+                "type": "string"
+              },
+              "has_discussions": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_downloads": {
+                "required": true,
+                "type": "boolean"
+              },
+              "has_issues": {
+                "required": true,
+                "type": "boolean"
+              },
+              "has_pages": {
+                "required": true,
+                "type": "boolean"
+              },
+              "has_projects": {
+                "required": true,
+                "type": "boolean"
+              },
+              "has_pull_requests": {
+                "required": false,
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "required": true,
+                "type": "boolean"
+              },
+              "homepage": {
+                "required": true,
+                "type": "string"
+              },
+              "hooks_url": {
+                "required": true,
+                "type": "string"
+              },
+              "html_url": {
+                "required": true,
+                "type": "string"
+              },
+              "id": {
+                "required": true,
+                "type": "integer"
+              },
+              "is_template": {
+                "required": false,
+                "type": "boolean"
+              },
+              "issue_comment_url": {
+                "required": true,
+                "type": "string"
+              },
+              "issue_events_url": {
+                "required": true,
+                "type": "string"
+              },
+              "issues_url": {
+                "required": true,
+                "type": "string"
+              },
+              "keys_url": {
+                "required": true,
+                "type": "string"
+              },
+              "labels_url": {
+                "required": true,
+                "type": "string"
+              },
+              "language": {
+                "required": true,
+                "type": "string"
+              },
+              "languages_url": {
+                "required": true,
+                "type": "string"
+              },
+              "license": {
+                "properties": {
+                  "html_url": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "key": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "name": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "node_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "spdx_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "url": {
+                    "required": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "name",
+                  "url",
+                  "spdx_id",
+                  "node_id"
+                ],
+                "type": "object"
+              },
+              "master_branch": {
+                "required": false,
+                "type": "string"
+              },
+              "merge_commit_message": {
+                "required": false,
+                "type": "string"
+              },
+              "merge_commit_title": {
+                "required": false,
+                "type": "string"
+              },
+              "merges_url": {
+                "required": true,
+                "type": "string"
+              },
+              "milestones_url": {
+                "required": true,
+                "type": "string"
+              },
+              "mirror_url": {
+                "required": true,
+                "type": "string"
+              },
+              "name": {
+                "required": true,
+                "type": "string"
+              },
+              "node_id": {
+                "required": true,
+                "type": "string"
+              },
+              "notifications_url": {
+                "required": true,
+                "type": "string"
+              },
+              "open_issues": {
+                "required": true,
+                "type": "integer"
+              },
+              "open_issues_count": {
+                "required": true,
+                "type": "integer"
+              },
+              "owner": {
+                "properties": {
+                  "avatar_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "email": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "events_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "followers_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "following_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "gists_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "gravatar_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "required": true,
+                    "type": "integer"
+                  },
+                  "login": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "name": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "node_id": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "organizations_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "received_events_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "repos_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "starred_at": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "starred_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "subscriptions_url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "type": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "url": {
+                    "required": true,
+                    "type": "string"
+                  },
+                  "user_view_type": {
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "login",
+                  "id",
+                  "node_id",
+                  "avatar_url",
+                  "gravatar_id",
+                  "url",
+                  "html_url",
+                  "followers_url",
+                  "following_url",
+                  "gists_url",
+                  "starred_url",
+                  "subscriptions_url",
+                  "organizations_url",
+                  "repos_url",
+                  "events_url",
+                  "received_events_url",
+                  "type",
+                  "site_admin"
+                ],
+                "type": "object"
+              },
+              "permissions": {
+                "properties": {
+                  "admin": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "maintain": {
+                    "required": false,
+                    "type": "boolean"
+                  },
+                  "pull": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "push": {
+                    "required": true,
+                    "type": "boolean"
+                  },
+                  "triage": {
+                    "required": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "admin",
+                  "pull",
+                  "push"
+                ],
+                "type": "object"
+              },
+              "private": {
+                "required": true,
+                "type": "boolean"
+              },
+              "pull_request_creation_policy": {
+                "required": false,
+                "type": "string"
+              },
+              "pulls_url": {
+                "required": true,
+                "type": "string"
+              },
+              "pushed_at": {
+                "required": true,
+                "type": "TIMESTAMP"
+              },
+              "releases_url": {
+                "required": true,
+                "type": "string"
+              },
+              "size": {
+                "required": true,
+                "type": "integer"
+              },
+              "squash_merge_commit_message": {
+                "required": false,
+                "type": "string"
+              },
+              "squash_merge_commit_title": {
+                "required": false,
+                "type": "string"
+              },
+              "ssh_url": {
+                "required": true,
+                "type": "string"
+              },
+              "stargazers_count": {
+                "required": true,
+                "type": "integer"
+              },
+              "stargazers_url": {
+                "required": true,
+                "type": "string"
+              },
+              "starred_at": {
+                "required": false,
+                "type": "string"
+              },
+              "statuses_url": {
+                "required": true,
+                "type": "string"
+              },
+              "subscribers_url": {
+                "required": true,
+                "type": "string"
+              },
+              "subscription_url": {
+                "required": true,
+                "type": "string"
+              },
+              "svn_url": {
+                "required": true,
+                "type": "string"
+              },
+              "tags_url": {
+                "required": true,
+                "type": "string"
+              },
+              "teams_url": {
+                "required": true,
+                "type": "string"
+              },
+              "temp_clone_token": {
+                "required": false,
+                "type": "string"
+              },
+              "topics": {
+                "required": false,
+                "type": "[]STRING"
+              },
+              "trees_url": {
+                "required": true,
+                "type": "string"
+              },
+              "updated_at": {
+                "required": true,
+                "type": "TIMESTAMP"
+              },
+              "url": {
+                "required": true,
+                "type": "string"
+              },
+              "use_squash_pr_title_as_default": {
+                "required": false,
+                "type": "boolean"
+              },
+              "visibility": {
+                "required": false,
+                "type": "string"
+              },
+              "watchers": {
+                "required": true,
+                "type": "integer"
+              },
+              "watchers_count": {
+                "required": true,
+                "type": "integer"
+              },
+              "web_commit_signoff_required": {
+                "required": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "node_id",
+              "name",
+              "full_name",
+              "license",
+              "forks",
+              "owner",
+              "private",
+              "html_url",
+              "description",
+              "fork",
+              "url",
+              "archive_url",
+              "assignees_url",
+              "blobs_url",
+              "branches_url",
+              "collaborators_url",
+              "comments_url",
+              "commits_url",
+              "compare_url",
+              "contents_url",
+              "contributors_url",
+              "deployments_url",
+              "downloads_url",
+              "events_url",
+              "forks_url",
+              "git_commits_url",
+              "git_refs_url",
+              "git_tags_url",
+              "git_url",
+              "issue_comment_url",
+              "issue_events_url",
+              "issues_url",
+              "keys_url",
+              "labels_url",
+              "languages_url",
+              "merges_url",
+              "milestones_url",
+              "notifications_url",
+              "pulls_url",
+              "releases_url",
+              "ssh_url",
+              "stargazers_url",
+              "statuses_url",
+              "subscribers_url",
+              "subscription_url",
+              "tags_url",
+              "teams_url",
+              "trees_url",
+              "clone_url",
+              "mirror_url",
+              "hooks_url",
+              "svn_url",
+              "homepage",
+              "language",
+              "forks_count",
+              "stargazers_count",
+              "watchers_count",
+              "size",
+              "default_branch",
+              "open_issues_count",
+              "has_issues",
+              "has_projects",
+              "has_wiki",
+              "has_pages",
+              "has_downloads",
+              "archived",
+              "disabled",
+              "pushed_at",
+              "created_at",
+              "updated_at",
+              "open_issues",
+              "watchers"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "status": 200
+      },
+      "summary": "List repositories for the authenticated user",
+      "type": "method"
+    },
     "github.repository.list": {
       "desc": "List repositories that an app installation can access.",
       "inputs": [
