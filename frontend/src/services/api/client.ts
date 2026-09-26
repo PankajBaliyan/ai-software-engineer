@@ -15,6 +15,7 @@ export const endpoints = {
   agentRun: "/agent/run",
   integrations: "/integrations",
   jiraTasks: "/jira/tasks",
+  slackMessages: "/slack/messages",
   history: "/history",
 } as const;
 

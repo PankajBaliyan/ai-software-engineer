@@ -75,7 +75,12 @@ export interface SlackMessage {
   channel: string;
   message: string;
   status: "sent" | "failed";
+  /** ISO timestamp */
   sentAt: string;
+  repository?: string;
+  /** Permalink to the posted message; null when sending failed */
+  url?: string | null;
+  error?: string | null;
 }
 
 export interface TimelineEvent {

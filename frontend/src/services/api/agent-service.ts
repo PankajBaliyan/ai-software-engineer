@@ -39,6 +39,11 @@ export async function fetchJiraTasks(): Promise<JiraTask[]> {
   return request<JiraTask[]>(endpoints.jiraTasks);
 }
 
+// Notifications the agent has sent (or failed to send), newest first.
+export async function fetchSlackMessages(): Promise<SlackMessage[]> {
+  return request<SlackMessage[]>(endpoints.slackMessages);
+}
+
 // Always live: falling back to mock data here would report fake "connected" statuses.
 export async function fetchIntegrations(): Promise<Integration[]> {
   return request<Integration[]>(endpoints.integrations);
@@ -195,14 +200,9 @@ export async function runAgent(
     }
 
     // Slack
-    step("slack", "completed", "Slack notified", 1000);
-    emit({ type: "slack", messages: [{
-      id: "sl-1",
-      channel: "#engineering",
-      message: "AI Agent finished processing: " + state.result,
-      status: "sent",
-      sentAt: clock()
-    }]});
+    const slackFailed = state.slack_message?.status === "failed";
+    step("slack", slackFailed ? "failed" : "completed", slackFailed ? "Slack notification failed" : "Slack notified", 1000);
+    if (state.slack_message) emit({ type: "slack", messages: [state.slack_message] });
 
     // Done
     step("verify", "completed", "Workflow verified", 500);

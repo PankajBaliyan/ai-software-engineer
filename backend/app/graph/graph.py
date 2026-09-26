@@ -1,7 +1,8 @@
 from typing import TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
 from app.services.openai import llm
-from app.config import JIRA_PROJECT_KEY, JIRA_SITE_URL
+from app.config import JIRA_PROJECT_KEY, JIRA_SITE_URL, SLACK_CHANNEL
+from app.services.slack_log import record_message
 from swytchcode_runtime import exec as swy_exec
 import json
 import os
@@ -16,6 +17,7 @@ class AgentState(TypedDict):
     jira_key: Optional[str]
     jira_summary: Optional[str]
     jira_url: Optional[str]
+    slack_message: Optional[dict]
     result: str
 
 def understand_request(state: AgentState):
@@ -132,17 +134,24 @@ def send_slack(state: AgentState):
         response = swy_exec("slack.chat.postmessage.create", {
             "token": "",
             "body": {
-                "channel": "#ai-bug-commander",
+                "channel": SLACK_CHANNEL,
                 "text": message
             }
         })
         print(f"Slack response: {response}")
+        data = response.get("data", {}) if isinstance(response, dict) else {}
+        # Slack reports failures like not_in_channel as HTTP 200 with ok=false
+        if not data.get("ok"):
+            raise RuntimeError(f"Slack API error: {data.get('error', 'unknown error')}")
+        slack_message = record_message(SLACK_CHANNEL, message, "sent", state.get("repository", ""),
+                       channel_id=data.get("channel"), ts=data.get("ts"))
         new_result = state.get("result", "") + f"\n\n[Action Taken] Sent Slack notification. {jira_status}"
     except Exception as e:
         print(f"Error sending Slack: {e}")
+        slack_message = record_message(SLACK_CHANNEL, message, "failed", state.get("repository", ""), error=str(e).strip().splitlines()[-1][:200])
         new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to send Slack notification. {jira_status}"
     
-    return {"result": new_result}
+    return {"result": new_result, "slack_message": slack_message}
 
 def route_jira_decision(state: AgentState):
     if "YES" in state.get("decision", ""):
