@@ -6,3 +6,4 @@ langchain-openai
 python-dotenv
 pydantic
 httpx
+swytchcode-runtime

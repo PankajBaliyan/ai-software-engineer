@@ -19,9 +19,13 @@ import {
 } from "./mock-data";
 
 export async function fetchRepositories(): Promise<Repository[]> {
-  if (!USE_MOCK) return request<Repository[]>(endpoints.repositories);
-  await delay(450);
-  return mockRepositories;
+  try {
+    return await request<Repository[]>(endpoints.repositories);
+  } catch (error) {
+    console.error("Failed to fetch repos from backend, falling back to mock", error);
+    await delay(450);
+    return mockRepositories;
+  }
 }
 
 export async function fetchIssues(repositoryId?: string): Promise<Issue[]> {
