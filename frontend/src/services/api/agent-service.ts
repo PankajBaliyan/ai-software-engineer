@@ -110,7 +110,7 @@ export async function runAgent(
     const response = await fetch("/api/agent/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: input.prompt }),
+      body: JSON.stringify({ prompt: input.prompt, repository: input.repository.fullName }),
       signal
     });
 
@@ -130,16 +130,35 @@ export async function runAgent(
     
     // Map github_issues from state
     const backendIssues = state.github_issues || [];
-    const issues: Issue[] = backendIssues.map((i: any) => ({
-      id: String(i.id),
-      number: i.number,
-      title: i.title,
-      state: i.state,
-      createdAt: i.created_at,
-      severity: "high", // Mock mapping for UI
-      url: i.html_url,
-      assignee: i.user?.login
-    }));
+    const issues: Issue[] = backendIssues.map((i: any) => {
+      const labels = (i.labels || []).map((l: any) => typeof l === 'string' ? l : l.name);
+      let severity = "low";
+      if (labels.includes("critical")) severity = "critical";
+      else if (labels.includes("high")) severity = "high";
+      else if (labels.includes("medium")) severity = "medium";
+      else if (labels.includes("low")) severity = "low";
+
+      return {
+        id: String(i.id),
+        number: i.number,
+        title: i.title,
+        state: i.state,
+        createdAt: i.created_at,
+        severity: severity as Severity,
+        priority: severity as Severity,
+        recommendation: "Needs triage",
+        labels: labels,
+        analysis: {
+          summary: i.body ? i.body.substring(0, 150) + "..." : "No description provided.",
+          impact: severity === "critical" || severity === "high" ? "high" : "low",
+          confidence: 85,
+          whyItMatters: "Affects system reliability or user experience.",
+          recommendedAction: "Review and prioritize appropriately."
+        },
+        url: i.html_url,
+        assignee: i.user?.login
+      };
+    });
     
     emit({ type: "issues", issues });
     step("github", "completed", `${issues.length} issues fetched`, 1500);

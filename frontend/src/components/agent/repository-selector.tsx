@@ -20,12 +20,29 @@ import { cn } from "@/lib/utils";
 export function RepositorySelector() {
   const [open, setOpen] = useState(false);
   const { repository, setRepository } = useAgent();
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isFetching, isError, refetch } = useQuery({
     queryKey: ["repositories"],
     queryFn: fetchRepositories,
+    enabled: false, // Don't fetch on mount
   });
 
-  if (isLoading) return <Skeleton className="h-10 w-full rounded-lg" />;
+  if (!data) {
+    return (
+      <Button
+        variant="outline"
+        className="h-10 w-full justify-center gap-2 font-normal"
+        onClick={() => void refetch()}
+        disabled={isFetching}
+      >
+        {isFetching ? (
+          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        ) : (
+          <Github className="size-4 text-muted-foreground" />
+        )}
+        {isFetching ? "Fetching repositories…" : "Fetch Repositories from GitHub"}
+      </Button>
+    );
+  }
 
   if (isError)
     return (

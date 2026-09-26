@@ -6,6 +6,7 @@ import json
 
 class AgentState(TypedDict):
     user_request: str
+    repository: str
     github_issues: Optional[list]
     analysis: Optional[str]
     decision: Optional[str]
@@ -20,20 +21,22 @@ def understand_request(state: AgentState):
     return {"result": response.content}
 
 def fetch_github_issues(state: AgentState):
-    print("🐙 Fetching GitHub Issues...")
+    print(f"🐙 Fetching GitHub Issues for {state.get('repository')}...")
     try:
-        # For this agent demo, we use the repo that the user tested earlier
-        response = swy_exec("github.issue.list", {
-            "owner": "PankajBaliyan",
-            "repo": "ai-software-engineer",
-            "state": "open"
+        # Use github.issue.list1 (search API) to fetch open issues for the selected repository
+        response = swy_exec("github.issue.list1", {
+            "q": f"repo:{state.get('repository')} state:open"
         })
-        issues = response if isinstance(response, list) else response.get("data", [])
-        if isinstance(issues, str):
+        
+        # The search API returns { data: { items: [...] } }
+        payload = response.get("data", {}) if isinstance(response, dict) else response
+        if isinstance(payload, str):
             try:
-                issues = json.loads(issues)
+                payload = json.loads(payload)
             except Exception:
-                issues = []
+                payload = {}
+        
+        issues = payload.get("items", []) if isinstance(payload, dict) else []
     except Exception as e:
         print(f"Error fetching issues: {e}")
         issues = []

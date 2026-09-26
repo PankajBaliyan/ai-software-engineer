@@ -12,6 +12,7 @@ app = FastAPI()
 
 class AgentRequest(BaseModel):
     prompt: str
+    repository: str | None = None
 
 
 import os
@@ -51,7 +52,6 @@ async def get_repositories():
             )
 
             result = response if isinstance(response, list) else response.get("data", [])
-            print("result",result)
 
             if isinstance(result, str):
                 try:
@@ -103,6 +103,7 @@ def run_agent(request: AgentRequest):
 
     result = graph.invoke({
         "user_request": request.prompt,
+        "repository": request.repository or "",
         "result": ""
     })
 
