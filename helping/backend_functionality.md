@@ -33,6 +33,7 @@ Final Result
 The backend must behave like an **AI agent**, not a fixed sequence of API calls.
 
 The buildathon requires:
+
 - An agentic framework
 - At least 3 Swytchcode APIs
 - Meaningful use of those APIs
@@ -40,6 +41,7 @@ The buildathon requires:
 - An end-to-end working prototype
 
 For this project:
+
 - Agent framework: **LangGraph**
 - Model provider: **OpenAI**
 - Backend: **Python + FastAPI**
@@ -199,7 +201,6 @@ GITHUB_OWNER=
 JIRA_PROJECT_KEY=
 JIRA_BASE_URL=
 
-SLACK_CHANNEL=
 
 FRONTEND_URL=http://localhost:5173
 
@@ -1894,7 +1895,7 @@ GET /
 returns:
 
 ```json
-{"status": "ok"}
+{ "status": "ok" }
 ```
 
 ---

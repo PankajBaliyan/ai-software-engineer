@@ -3,6 +3,7 @@ from langgraph.graph import StateGraph, START, END
 from app.services.openai import llm
 from swytchcode_runtime import exec as swy_exec
 import json
+import os
 
 class AgentState(TypedDict):
     user_request: str
@@ -57,17 +58,64 @@ def decide_actions(state: AgentState):
     decision = response.content.strip().upper()
     return {"decision": decision}
 
+def to_adf(text: str):
+    # Jira REST API v3 requires Atlassian Document Format for the description field
+    paragraphs = [p for p in text.split("\n\n") if p.strip()] or [text]
+    return {
+        "type": "doc",
+        "version": 1,
+        "content": [
+            {"type": "paragraph", "content": [{"type": "text", "text": p}]}
+            for p in paragraphs
+        ],
+    }
+
 def create_jira(state: AgentState):
     print("📋 Creating Jira Ticket...")
-    # This would execute swy_exec("jira.issue.create", {...}) when the bundle is added
-    new_result = state.get("result", "") + "\n\n[Action Taken] Created Jira ticket for tracking."
-    return {"jira_created": True, "result": new_result}
+    try:
+        response = swy_exec("jira.api.issue.create", {
+            "body": {
+                "fields": {
+                    "project": {"key": os.getenv("JIRA_PROJECT_KEY", "KAN")},
+                    "summary": f"Bug from {state.get('repository', 'Unknown')}",
+                    "description": to_adf(state.get('analysis') or "Please investigate the recent bug."),
+                    "issuetype": {"name": os.getenv("JIRA_ISSUE_TYPE", "Task")}
+                }
+            }
+        })
+        print(f"Jira response: {response}")
+        new_result = state.get("result", "") + "\n\n[Action Taken] Created Jira ticket for tracking."
+        return {"jira_created": True, "result": new_result}
+    except Exception as e:
+        print(f"Error creating Jira: {e}")
+        new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to create Jira ticket: {e}"
+        return {"jira_created": False, "result": new_result}
 
 def send_slack(state: AgentState):
     print("💬 Sending Slack Notification...")
-    # This would execute swy_exec("slack.message.create", {...}) when the bundle is added
-    jira_status = "A Jira ticket was created." if state.get("jira_created") else "No Jira ticket was needed."
-    new_result = state.get("result", "") + f"\n\n[Action Taken] Sent Slack notification. {jira_status}"
+    jira_created = state.get("jira_created")
+    if jira_created is True:
+        jira_status = "A Jira ticket was created."
+    elif jira_created is False:
+        jira_status = "Jira ticket creation failed - check the backend logs."
+    else:
+        jira_status = "No Jira ticket was needed."
+    message = f"AI Bug Commander Update for {state.get('repository')}: {jira_status}"
+    
+    try:
+        response = swy_exec("slack.chat.postmessage.create", {
+            "token": "",
+            "body": {
+                "channel": "#ai-bug-commander",
+                "text": message
+            }
+        })
+        print(f"Slack response: {response}")
+        new_result = state.get("result", "") + f"\n\n[Action Taken] Sent Slack notification. {jira_status}"
+    except Exception as e:
+        print(f"Error sending Slack: {e}")
+        new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to send Slack notification. {jira_status}"
+    
     return {"result": new_result}
 
 def route_jira_decision(state: AgentState):
