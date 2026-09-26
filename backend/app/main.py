@@ -71,7 +71,7 @@ async def get_repositories():
             page += 1
 
         repos = []
-        print("all_repos",all_repos)
+        # print("all_repos",all_repos)
         for r in all_repos:
             repos.append({
                 "id": str(r.get("id", "")),
@@ -108,5 +108,5 @@ def run_agent(request: AgentRequest):
 
     return {
         "success": True,
-        "result": result
+        "state": result
     }

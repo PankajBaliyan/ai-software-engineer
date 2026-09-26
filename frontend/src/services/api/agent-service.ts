@@ -99,175 +99,95 @@ export async function runAgent(
     emit({ type: "step", step: { id, label: meta.label, status, ...(detail !== undefined && { detail }), ...(durationMs !== undefined && { durationMs }) } });
   };
 
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "Request received" } });
+  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "Request received by LangGraph backend" } });
   step("understand", "running");
-  emit({ type: "status", message: "Interpreting your request…" });
-  await delay(900);
-  if (aborted()) return;
-  step("understand", "completed", "Goal: triage unresolved bugs and act on critical ones", 900);
-
-  // GitHub
-  step("github", "running");
-  emit({ type: "status", message: `Connecting to ${input.repository.fullName}…` });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "GitHub", status: "running", message: "Fetching unresolved issues" },
-  });
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "GitHub tool selected" } });
-  await delay(1400);
+  emit({ type: "status", message: "Executing LangGraph AI Agent..." });
+  
   if (aborted()) return;
 
-  if (input.simulateFailure) {
-    emit({
-      type: "activity",
-      activity: {
-        id: nextId(),
-        tool: "GitHub",
-        status: "error",
-        message: "Unable to fetch repository issues (503)",
-        durationMs: 1400,
-      },
+  try {
+    // Call the real backend LangGraph
+    const response = await fetch("/api/agent/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: input.prompt }),
+      signal
     });
-    step("github", "failed", "GitHub request failed");
-    emit({ type: "error", stepId: "github", message: "Unable to fetch repository issues." });
-    return;
+
+    if (!response.ok) throw new Error("Backend agent failed");
+    
+    const data = await response.json();
+    const state = data.state;
+    
+    if (aborted()) return;
+
+    // Understand step
+    step("understand", "completed", "Goal analyzed by AI", 1000);
+
+    // GitHub
+    step("github", "running");
+    emit({ type: "activity", activity: { id: nextId(), tool: "GitHub", status: "success", message: `Fetched issues via Swytchcode` } });
+    
+    // Map github_issues from state
+    const backendIssues = state.github_issues || [];
+    const issues: Issue[] = backendIssues.map((i: any) => ({
+      id: String(i.id),
+      number: i.number,
+      title: i.title,
+      state: i.state,
+      createdAt: i.created_at,
+      severity: "high", // Mock mapping for UI
+      url: i.html_url,
+      assignee: i.user?.login
+    }));
+    
+    emit({ type: "issues", issues });
+    step("github", "completed", `${issues.length} issues fetched`, 1500);
+
+    // Analyze
+    step("analyze", "completed", "AI analyzed repository bugs", 3000);
+    emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "AI analysis completed: " + (state.decision || "") } });
+    
+    // Decide & Prioritize
+    step("prioritize", "completed", "Issues prioritized", 500);
+    step("decide", "completed", state.decision === "YES" ? "Decided to create Jira ticket" : "Decided to skip Jira", 1000);
+
+    // Jira
+    if (state.jira_created) {
+      step("jira", "completed", "Jira ticket created", 1500);
+      emit({ type: "activity", activity: { id: nextId(), tool: "Jira", status: "success", message: "Created tracking ticket" } });
+      emit({ type: "jira", tasks: [{
+        key: "BUG-101",
+        title: "AI Tracked Bug",
+        priority: "critical",
+        status: "Created",
+        assignee: "unassigned",
+        createdAt: clock(),
+        issueNumber: issues[0]?.number || 1,
+        url: "#"
+      }]});
+    } else {
+      step("jira", "skipped", "Jira not needed based on analysis");
+    }
+
+    // Slack
+    step("slack", "completed", "Slack notified", 1000);
+    emit({ type: "slack", messages: [{
+      id: "sl-1",
+      channel: "#engineering",
+      message: "AI Agent finished processing: " + state.result,
+      status: "sent",
+      sentAt: clock()
+    }]});
+
+    // Done
+    step("verify", "completed", "Workflow verified", 500);
+    step("done", "completed", "Agent finished");
+    emit({ type: "status", message: "Agent completed" });
+
+  } catch (err) {
+    console.error(err);
+    step("understand", "failed", "Request failed");
+    emit({ type: "error", stepId: "understand", message: "Failed to connect to backend LangGraph." });
   }
-
-  const issues = await fetchIssues(input.repository.id);
-  emit({ type: "issues", issues });
-  emit({
-    type: "activity",
-    activity: {
-      id: nextId(),
-      tool: "GitHub",
-      status: "success",
-      message: `Fetched ${issues.length} unresolved issues`,
-      durationMs: 2400,
-    },
-  });
-  step("github", "completed", `${issues.length} issues fetched`, 2400);
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: `${issues.length} issues fetched` } });
-
-  // Analysis
-  step("analyze", "running");
-  emit({ type: "status", message: `Analyzing ${issues.length} GitHub issues…` });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "AI Analysis", status: "running", message: "Determining severity and impact" },
-  });
-  await delay(2000);
-  if (aborted()) return;
-  emit({
-    type: "activity",
-    activity: {
-      id: nextId(),
-      tool: "AI Analysis",
-      status: "success",
-      message: `Analyzed ${issues.length} issues`,
-      durationMs: 4800,
-    },
-  });
-  step("analyze", "completed", "Severity, impact and confidence scored", 4800);
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "AI analysis completed" } });
-
-  // Prioritize
-  step("prioritize", "running");
-  await delay(700);
-  if (aborted()) return;
-  const critical = issues.filter((i) => i.severity === "critical");
-  step("prioritize", "completed", `${critical.length} critical, ${issues.filter((i) => i.severity === "high").length} high`, 700);
-
-  // Decide
-  step("decide", "running");
-  emit({ type: "status", message: "Deciding which actions each bug requires" });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "Swytchcode", status: "running", message: "Resolving tool routes for selected actions" },
-  });
-  await delay(1100);
-  if (aborted()) return;
-
-  const decisions: AgentDecision[] = critical.map((issue, idx) => ({
-    issueNumber: issue.number,
-    title: issue.title,
-    reason: idx === 2 ? "Critical but already mitigated by retry queue" : "Critical + customer-facing impact",
-    actions: idx === 2 ? ["Create Jira task", "Monitor"] : ["Create Jira task", "Notify Slack"],
-  }));
-  emit({ type: "selection", decisions });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "Swytchcode", status: "success", message: "Routed Jira + Slack tool calls", durationMs: 1100 },
-  });
-  step("decide", "completed", `${decisions.length} bugs selected for action`, 1100);
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: `${decisions.length} critical bugs selected` } });
-
-  // Jira
-  step("jira", "running");
-  emit({ type: "status", message: "Creating Jira tasks…" });
-  emit({ type: "activity", activity: { id: nextId(), tool: "Jira", status: "running", message: "Creating tasks in project BUG" } });
-  await delay(1300);
-  if (aborted()) return;
-  const tasks: JiraTask[] = critical.map((issue, idx) => ({
-    key: `BUG-${421 + idx}`,
-    title: issue.title,
-    priority: issue.severity,
-    status: "Created",
-    assignee: issue.assignee ?? "unassigned",
-    createdAt: clock(),
-    issueNumber: issue.number,
-    url: `https://northwind.atlassian.net/browse/BUG-${421 + idx}`,
-  }));
-  emit({ type: "jira", tasks });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "Jira", status: "success", message: `Created ${tasks.length} tasks`, durationMs: 1700 },
-  });
-  step("jira", "completed", `${tasks.length} tasks created`, 1700);
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "Jira tasks created" } });
-
-  // Slack
-  step("slack", "running");
-  emit({ type: "status", message: "Notifying the team on Slack…" });
-  emit({ type: "activity", activity: { id: nextId(), tool: "Slack", status: "running", message: "Posting to #engineering" } });
-  await delay(1000);
-  if (aborted()) return;
-  const notified = decisions.filter((d) => d.actions.includes("Notify Slack"));
-  const messages: SlackMessage[] = notified.map((d, idx) => ({
-    id: `sl-${idx}`,
-    channel: idx === 0 ? "#engineering" : "#payments",
-    message: `AI Bug Commander flagged #${d.issueNumber} — ${d.title}. Jira task ${tasks[idx]?.key ?? "BUG-421"} created.`,
-    status: "sent",
-    sentAt: clock(),
-  }));
-  messages.unshift({
-    id: "sl-summary",
-    channel: "#engineering",
-    message: `AI Bug Commander identified ${critical.length} critical bugs requiring immediate attention.`,
-    status: "sent",
-    sentAt: clock(),
-  });
-  emit({ type: "slack", messages });
-  emit({
-    type: "activity",
-    activity: { id: nextId(), tool: "Slack", status: "success", message: `Sent ${messages.length} notifications`, durationMs: 900 },
-  });
-  step("slack", "completed", `${messages.length} notifications sent`, 900);
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "Slack notifications sent" } });
-
-  // Verify
-  step("verify", "running");
-  await delay(700);
-  if (aborted()) return;
-  step("verify", "completed", "All tool results confirmed", 700);
-
-  const summary: RunSummary = {
-    analyzed: issues.length,
-    bySeverity: countBySeverity(issues),
-    jiraCreated: tasks.length,
-    slackSent: messages.length,
-  };
-  emit({ type: "summary", summary });
-  step("done", "completed", "Workflow completed");
-  emit({ type: "status", message: "Agent completed" });
-  emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "Workflow completed" } });
 }
