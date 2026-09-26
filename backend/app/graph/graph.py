@@ -1,6 +1,7 @@
 from typing import TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
 from app.services.openai import llm
+from app.config import JIRA_PROJECT_KEY, JIRA_SITE_URL
 from swytchcode_runtime import exec as swy_exec
 import json
 import os
@@ -13,6 +14,8 @@ class AgentState(TypedDict):
     decision: Optional[str]
     jira_created: Optional[bool]
     jira_key: Optional[str]
+    jira_summary: Optional[str]
+    jira_url: Optional[str]
     result: str
 
 def understand_request(state: AgentState):
@@ -93,7 +96,7 @@ def create_jira(state: AgentState):
         response = swy_exec("jira.api.issue.create", {
             "body": {
                 "fields": {
-                    "project": {"key": os.getenv("JIRA_PROJECT_KEY", "KAN")},
+                    "project": {"key": JIRA_PROJECT_KEY},
                     "summary": summary,
                     "description": to_adf(state.get('analysis') or "Please investigate the recent bug."),
                     "issuetype": {"name": os.getenv("JIRA_ISSUE_TYPE", "Task")}
@@ -104,7 +107,8 @@ def create_jira(state: AgentState):
         data = response.get("data", {}) if isinstance(response, dict) else {}
         jira_key = data.get("key") if isinstance(data, dict) else None
         new_result = state.get("result", "") + f"\n\n[Action Taken] Created Jira ticket {jira_key or ''} for tracking."
-        return {"jira_created": True, "jira_key": jira_key, "result": new_result}
+        return {"jira_created": True, "jira_key": jira_key, "jira_summary": summary,
+                "jira_url": f"{JIRA_SITE_URL}/browse/{jira_key}" if jira_key else None, "result": new_result}
     except Exception as e:
         print(f"Error creating Jira: {e}")
         new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to create Jira ticket: {e}"
@@ -115,8 +119,7 @@ def send_slack(state: AgentState):
     jira_created = state.get("jira_created")
     jira_key = state.get("jira_key")
     if jira_created is True and jira_key:
-        site_url = os.getenv("JIRA_SITE_URL", "https://pankajbaliyan902018.atlassian.net").rstrip("/")
-        jira_status = f"Created Jira ticket {jira_key}: {site_url}/browse/{jira_key}"
+        jira_status = f"Created Jira ticket {jira_key}: {JIRA_SITE_URL}/browse/{jira_key}"
     elif jira_created is True:
         jira_status = "A Jira ticket was created."
     elif jira_created is False:

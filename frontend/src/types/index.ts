@@ -61,10 +61,12 @@ export interface JiraTask {
   key: string;
   title: string;
   priority: Severity;
-  status: "Created" | "In Progress" | "Done";
+  /** Jira workflow status name, e.g. "To Do", "In Progress", "Done" */
+  status: string;
   assignee: string;
+  issueType: string;
+  /** ISO timestamp */
   createdAt: string;
-  issueNumber: number;
   url: string;
 }
 

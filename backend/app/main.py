@@ -6,10 +6,12 @@ from pydantic import BaseModel
 
 from app.graph.graph import graph
 from app.api.integrations import router as integrations_router
+from app.api.jira import router as jira_router
 
 
 app = FastAPI()
 app.include_router(integrations_router)
+app.include_router(jira_router)
 
 
 class AgentRequest(BaseModel):

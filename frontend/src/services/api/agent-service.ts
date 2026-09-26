@@ -34,6 +34,11 @@ export async function fetchIssues(repositoryId?: string): Promise<Issue[]> {
   return mockIssues;
 }
 
+// Live Jira tickets for the configured project, newest first.
+export async function fetchJiraTasks(): Promise<JiraTask[]> {
+  return request<JiraTask[]>(endpoints.jiraTasks);
+}
+
 // Always live: falling back to mock data here would report fake "connected" statuses.
 export async function fetchIntegrations(): Promise<Integration[]> {
   return request<Integration[]>(endpoints.integrations);
@@ -173,16 +178,18 @@ export async function runAgent(
     if (state.jira_created) {
       step("jira", "completed", "Jira ticket created", 1500);
       emit({ type: "activity", activity: { id: nextId(), tool: "Jira", status: "success", message: "Created tracking ticket" } });
-      emit({ type: "jira", tasks: [{
-        key: "BUG-101",
-        title: "AI Tracked Bug",
-        priority: "critical",
-        status: "Created",
-        assignee: "unassigned",
-        createdAt: clock(),
-        issueNumber: issues[0]?.number || 1,
-        url: "#"
-      }]});
+      if (state.jira_key) {
+        emit({ type: "jira", tasks: [{
+          key: state.jira_key,
+          title: state.jira_summary || "AI Tracked Bug",
+          priority: "critical",
+          status: "To Do",
+          assignee: "Unassigned",
+          issueType: "",
+          createdAt: new Date().toISOString(),
+          url: state.jira_url || "#",
+        }]});
+      }
     } else {
       step("jira", "skipped", "Jira not needed based on analysis");
     }

@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from openai import OpenAI
 from swytchcode_runtime import exec as swy_exec
 
+from app.config import JIRA_PROJECT_KEY
 from app.services.openai import llm
 
 router = APIRouter()
@@ -34,7 +35,7 @@ def check_github() -> dict:
 
 
 def check_jira() -> dict:
-    project_key = os.getenv("JIRA_PROJECT_KEY", "KAN")
+    project_key = JIRA_PROJECT_KEY
     project = swy_data("jira.api.project.get2", {"projectIdOrKey": project_key})
     issue_type = os.getenv("JIRA_ISSUE_TYPE", "Task")
     types = [t.get("name") for t in project.get("issueTypes", [])]

@@ -14,6 +14,7 @@ export const endpoints = {
   issues: "/issues",
   agentRun: "/agent/run",
   integrations: "/integrations",
+  jiraTasks: "/jira/tasks",
   history: "/history",
 } as const;
 
