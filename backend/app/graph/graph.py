@@ -12,6 +12,7 @@ class AgentState(TypedDict):
     analysis: Optional[str]
     decision: Optional[str]
     jira_created: Optional[bool]
+    jira_key: Optional[str]
     result: str
 
 def understand_request(state: AgentState):
@@ -70,22 +71,40 @@ def to_adf(text: str):
         ],
     }
 
+def jira_summary(state: AgentState):
+    fallback = f"Bug from {state.get('repository', 'Unknown')}"
+    try:
+        response = llm.invoke(
+            f"Based on this analysis:\n{state.get('analysis')}\n"
+            "Write a concise Jira ticket title (max 100 characters) for the single most critical bug. "
+            "Reply with the title only, no quotes or prefixes."
+        )
+        title = response.content.strip().strip('"').splitlines()[0].strip()
+        # Jira rejects summaries longer than 255 characters
+        return title[:255] if title else fallback
+    except Exception as e:
+        print(f"Error generating Jira summary: {e}")
+        return fallback
+
 def create_jira(state: AgentState):
     print("📋 Creating Jira Ticket...")
+    summary = jira_summary(state)
     try:
         response = swy_exec("jira.api.issue.create", {
             "body": {
                 "fields": {
                     "project": {"key": os.getenv("JIRA_PROJECT_KEY", "KAN")},
-                    "summary": f"Bug from {state.get('repository', 'Unknown')}",
+                    "summary": summary,
                     "description": to_adf(state.get('analysis') or "Please investigate the recent bug."),
                     "issuetype": {"name": os.getenv("JIRA_ISSUE_TYPE", "Task")}
                 }
             }
         })
         print(f"Jira response: {response}")
-        new_result = state.get("result", "") + "\n\n[Action Taken] Created Jira ticket for tracking."
-        return {"jira_created": True, "result": new_result}
+        data = response.get("data", {}) if isinstance(response, dict) else {}
+        jira_key = data.get("key") if isinstance(data, dict) else None
+        new_result = state.get("result", "") + f"\n\n[Action Taken] Created Jira ticket {jira_key or ''} for tracking."
+        return {"jira_created": True, "jira_key": jira_key, "result": new_result}
     except Exception as e:
         print(f"Error creating Jira: {e}")
         new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to create Jira ticket: {e}"
@@ -94,7 +113,11 @@ def create_jira(state: AgentState):
 def send_slack(state: AgentState):
     print("💬 Sending Slack Notification...")
     jira_created = state.get("jira_created")
-    if jira_created is True:
+    jira_key = state.get("jira_key")
+    if jira_created is True and jira_key:
+        site_url = os.getenv("JIRA_SITE_URL", "https://pankajbaliyan902018.atlassian.net").rstrip("/")
+        jira_status = f"Created Jira ticket {jira_key}: {site_url}/browse/{jira_key}"
+    elif jira_created is True:
         jira_status = "A Jira ticket was created."
     elif jira_created is False:
         jira_status = "Jira ticket creation failed - check the backend logs."

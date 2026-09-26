@@ -22,7 +22,13 @@ export const Route = createFileRoute("/integrations")({
 });
 
 function IntegrationsPage() {
-  const q = useQuery({ queryKey: ["integrations"], queryFn: fetchIntegrations });
+  const q = useQuery({
+    queryKey: ["integrations"],
+    queryFn: fetchIntegrations,
+    // Each check hits live GitHub/Jira/Slack/OpenAI APIs, so only re-run on demand
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
+  });
   return (
     <Page>
       <PageHeader title="Integrations" description="Credentials are stored on the server and never shown here."

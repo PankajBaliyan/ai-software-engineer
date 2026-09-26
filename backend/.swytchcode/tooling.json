@@ -8351,6 +8351,492 @@
       "summary": "List repositories accessible to the app installation",
       "type": "method"
     },
+    "github.user.list1": {
+      "desc": "OAuth app tokens and personal access tokens (classic) need the `user` scope in order for the response to include private profile information.",
+      "inputs": null,
+      "integration": "GitHub.github@1.1.4",
+      "method_hash": "c0045b39278b023a71de8752f745299f7fc365dfa070dbf0e96f0afbbeb1cf0b",
+      "output": {
+        "schema": {
+          "properties": {
+            "_COMPOSITION": {
+              "required": false,
+              "type": "ONE_OF"
+            },
+            "user_view_type": {
+              "required": true,
+              "type": "string"
+            },
+            "variant_private_user_d57498cc": {
+              "properties": {
+                "avatar_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "bio": {
+                  "required": true,
+                  "type": "string"
+                },
+                "blog": {
+                  "required": true,
+                  "type": "string"
+                },
+                "business_plus": {
+                  "required": false,
+                  "type": "boolean"
+                },
+                "collaborators": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "company": {
+                  "required": true,
+                  "type": "string"
+                },
+                "created_at": {
+                  "required": true,
+                  "type": "TIMESTAMP"
+                },
+                "disk_usage": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "email": {
+                  "required": true,
+                  "type": "string"
+                },
+                "events_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "followers": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "followers_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "following": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "following_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "gists_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "gravatar_id": {
+                  "required": true,
+                  "type": "string"
+                },
+                "hireable": {
+                  "required": true,
+                  "type": "boolean"
+                },
+                "html_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "id": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "ldap_dn": {
+                  "required": false,
+                  "type": "string"
+                },
+                "location": {
+                  "required": true,
+                  "type": "string"
+                },
+                "login": {
+                  "required": true,
+                  "type": "string"
+                },
+                "name": {
+                  "required": true,
+                  "type": "string"
+                },
+                "node_id": {
+                  "required": true,
+                  "type": "string"
+                },
+                "notification_email": {
+                  "required": false,
+                  "type": "string"
+                },
+                "organizations_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "owned_private_repos": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "plan": {
+                  "properties": {
+                    "collaborators": {
+                      "required": true,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "required": true,
+                      "type": "string"
+                    },
+                    "private_repos": {
+                      "required": true,
+                      "type": "integer"
+                    },
+                    "space": {
+                      "required": true,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "collaborators",
+                    "name",
+                    "space",
+                    "private_repos"
+                  ],
+                  "type": "object"
+                },
+                "private_gists": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "public_gists": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "public_repos": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "received_events_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "repos_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "site_admin": {
+                  "required": true,
+                  "type": "boolean"
+                },
+                "starred_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "subscriptions_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "total_private_repos": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "twitter_username": {
+                  "required": false,
+                  "type": "string"
+                },
+                "two_factor_authentication": {
+                  "required": true,
+                  "type": "boolean"
+                },
+                "type": {
+                  "required": true,
+                  "type": "string"
+                },
+                "updated_at": {
+                  "required": true,
+                  "type": "TIMESTAMP"
+                },
+                "url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "user_view_type": {
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "login",
+                "id",
+                "node_id",
+                "avatar_url",
+                "gravatar_id",
+                "url",
+                "html_url",
+                "followers_url",
+                "following_url",
+                "gists_url",
+                "starred_url",
+                "subscriptions_url",
+                "organizations_url",
+                "repos_url",
+                "events_url",
+                "received_events_url",
+                "type",
+                "site_admin",
+                "name",
+                "company",
+                "blog",
+                "location",
+                "email",
+                "hireable",
+                "bio",
+                "public_repos",
+                "public_gists",
+                "followers",
+                "following",
+                "created_at",
+                "updated_at",
+                "private_gists",
+                "total_private_repos",
+                "owned_private_repos",
+                "disk_usage",
+                "collaborators",
+                "two_factor_authentication"
+              ],
+              "type": "object"
+            },
+            "variant_public_user_dd3888d0": {
+              "properties": {
+                "avatar_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "bio": {
+                  "required": true,
+                  "type": "string"
+                },
+                "blog": {
+                  "required": true,
+                  "type": "string"
+                },
+                "collaborators": {
+                  "required": false,
+                  "type": "integer"
+                },
+                "company": {
+                  "required": true,
+                  "type": "string"
+                },
+                "created_at": {
+                  "required": true,
+                  "type": "TIMESTAMP"
+                },
+                "disk_usage": {
+                  "required": false,
+                  "type": "integer"
+                },
+                "email": {
+                  "required": true,
+                  "type": "string"
+                },
+                "events_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "followers": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "followers_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "following": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "following_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "gists_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "gravatar_id": {
+                  "required": true,
+                  "type": "string"
+                },
+                "hireable": {
+                  "required": true,
+                  "type": "boolean"
+                },
+                "html_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "id": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "location": {
+                  "required": true,
+                  "type": "string"
+                },
+                "login": {
+                  "required": true,
+                  "type": "string"
+                },
+                "name": {
+                  "required": true,
+                  "type": "string"
+                },
+                "node_id": {
+                  "required": true,
+                  "type": "string"
+                },
+                "notification_email": {
+                  "required": false,
+                  "type": "string"
+                },
+                "organizations_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "owned_private_repos": {
+                  "required": false,
+                  "type": "integer"
+                },
+                "plan": {
+                  "properties": {
+                    "collaborators": {
+                      "required": true,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "required": true,
+                      "type": "string"
+                    },
+                    "private_repos": {
+                      "required": true,
+                      "type": "integer"
+                    },
+                    "space": {
+                      "required": true,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "collaborators",
+                    "name",
+                    "space",
+                    "private_repos"
+                  ],
+                  "type": "object"
+                },
+                "private_gists": {
+                  "required": false,
+                  "type": "integer"
+                },
+                "public_gists": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "public_repos": {
+                  "required": true,
+                  "type": "integer"
+                },
+                "received_events_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "repos_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "site_admin": {
+                  "required": true,
+                  "type": "boolean"
+                },
+                "starred_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "subscriptions_url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "total_private_repos": {
+                  "required": false,
+                  "type": "integer"
+                },
+                "twitter_username": {
+                  "required": false,
+                  "type": "string"
+                },
+                "type": {
+                  "required": true,
+                  "type": "string"
+                },
+                "updated_at": {
+                  "required": true,
+                  "type": "TIMESTAMP"
+                },
+                "url": {
+                  "required": true,
+                  "type": "string"
+                },
+                "user_view_type": {
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "login",
+                "id",
+                "node_id",
+                "avatar_url",
+                "gravatar_id",
+                "url",
+                "html_url",
+                "followers_url",
+                "following_url",
+                "gists_url",
+                "starred_url",
+                "subscriptions_url",
+                "organizations_url",
+                "repos_url",
+                "events_url",
+                "received_events_url",
+                "type",
+                "site_admin",
+                "name",
+                "company",
+                "blog",
+                "location",
+                "email",
+                "hireable",
+                "bio",
+                "public_repos",
+                "public_gists",
+                "followers",
+                "following",
+                "created_at",
+                "updated_at"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "user_view_type"
+          ]
+        },
+        "status": 200
+      },
+      "summary": "Get the authenticated user",
+      "type": "method"
+    },
     "jira.api.issue.create": {
       "desc": "Creates an issue or, where the option to create subtasks is enabled in Jira, a subtask. A transition may be applied, to move the issue or subtask to a workflow step other than the default start step, and issue properties set.\n\nThe content of the issue or subtask is defined using `update` and `fields`. The fields that can be set in the issue or subtask are determined using the [ Get create issue metadata](#api-rest-api-3-issue-createmeta-get). These are the same fields that appear on the issue's create screen. Note that the `description`, `environment`, and any `textarea` type custom fields (multi-line text fields) take Atlassian Document Format content. Single line custom fields (`textfield`) accept a string and don't handle Atlassian Document Format content.\n\nCreating a subtask differs from creating an issue as follows:\n\n *  `issueType` must be set to a subtask issue type (use [ Get create issue metadata](#api-rest-api-3-issue-createmeta-get) to find subtask issue types).\n *  `parent` must contain the ID or key of the parent issue.\n\nIn a next-gen project any issue may be made a child providing that the parent and child are members of the same project.\n\n**[Permissions](#permissions) required:** *Browse projects* and *Create issues* [project permissions](https://confluence.atlassian.com/x/yodKLg) for the project in which the issue or subtask is created.",
       "inputs": [
@@ -11412,6 +11898,69 @@
         "status": 200
       },
       "summary": "Get project",
+      "type": "method"
+    },
+    "slack.auth.test.list": {
+      "desc": "Checks authentication \u0026 identity.",
+      "inputs": [
+        {
+          "token": {
+            "LOCATION": "header",
+            "REQUIRED": true,
+            "TYPE": "STRING"
+          }
+        }
+      ],
+      "integration": "Slack.slack@1.7.0",
+      "method_hash": "7eb778224ff9e727ff1bd52bf69bbc4953d59206d482eeff9e6b15197a7f40b7",
+      "output": {
+        "schema": {
+          "properties": {
+            "bot_id": {
+              "required": false,
+              "type": "string"
+            },
+            "is_enterprise_install": {
+              "required": false,
+              "type": "boolean"
+            },
+            "ok": {
+              "required": true,
+              "type": "boolean"
+            },
+            "team": {
+              "required": true,
+              "type": "string"
+            },
+            "team_id": {
+              "required": true,
+              "type": "string"
+            },
+            "url": {
+              "required": true,
+              "type": "string"
+            },
+            "user": {
+              "required": true,
+              "type": "string"
+            },
+            "user_id": {
+              "required": true,
+              "type": "string"
+            }
+          },
+          "required": [
+            "ok",
+            "team",
+            "team_id",
+            "url",
+            "user",
+            "user_id"
+          ]
+        },
+        "status": 200
+      },
+      "summary": "Checks authentication \u0026 identity.",
       "type": "method"
     },
     "slack.chat.postmessage.create": {

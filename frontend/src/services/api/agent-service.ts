@@ -13,7 +13,6 @@ import type {
 import { delay, endpoints, request, USE_MOCK } from "./client";
 import {
   executionHistory,
-  integrations,
   issues as mockIssues,
   repositories as mockRepositories,
 } from "./mock-data";
@@ -35,10 +34,9 @@ export async function fetchIssues(repositoryId?: string): Promise<Issue[]> {
   return mockIssues;
 }
 
+// Always live: falling back to mock data here would report fake "connected" statuses.
 export async function fetchIntegrations(): Promise<Integration[]> {
-  if (!USE_MOCK) return request<Integration[]>(endpoints.integrations);
-  await delay(350);
-  return integrations;
+  return request<Integration[]>(endpoints.integrations);
 }
 
 export async function fetchHistory(): Promise<ExecutionRecord[]> {

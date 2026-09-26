@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from app.graph.graph import graph
+from app.api.integrations import router as integrations_router
 
 
 app = FastAPI()
+app.include_router(integrations_router)
 
 
 class AgentRequest(BaseModel):
