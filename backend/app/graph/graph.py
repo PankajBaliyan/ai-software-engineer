@@ -1,8 +1,8 @@
 from typing import TypedDict, Optional, List
 from langgraph.graph import StateGraph, START, END
 from app.services.openai import llm
-from app.config import JIRA_PROJECT_KEY, JIRA_SITE_URL, SLACK_CHANNEL
-from app.services.slack_log import record_message
+from app.config import JIRA_PROJECT_KEY, JIRA_SITE_URL
+from app.services.slack_log import post_to_slack
 from swytchcode_runtime import exec as swy_exec
 import json
 import os
@@ -129,28 +129,11 @@ def send_slack(state: AgentState):
     else:
         jira_status = "No Jira ticket was needed."
     message = f"AI Bug Commander Update for {state.get('repository')}: {jira_status}"
-    
-    try:
-        response = swy_exec("slack.chat.postmessage.create", {
-            "token": "",
-            "body": {
-                "channel": SLACK_CHANNEL,
-                "text": message
-            }
-        })
-        print(f"Slack response: {response}")
-        data = response.get("data", {}) if isinstance(response, dict) else {}
-        # Slack reports failures like not_in_channel as HTTP 200 with ok=false
-        if not data.get("ok"):
-            raise RuntimeError(f"Slack API error: {data.get('error', 'unknown error')}")
-        slack_message = record_message(SLACK_CHANNEL, message, "sent", state.get("repository", ""),
-                       channel_id=data.get("channel"), ts=data.get("ts"))
-        new_result = state.get("result", "") + f"\n\n[Action Taken] Sent Slack notification. {jira_status}"
-    except Exception as e:
-        print(f"Error sending Slack: {e}")
-        slack_message = record_message(SLACK_CHANNEL, message, "failed", state.get("repository", ""), error=str(e).strip().splitlines()[-1][:200])
-        new_result = state.get("result", "") + f"\n\n[Action Taken] Failed to send Slack notification. {jira_status}"
-    
+
+    slack_message = post_to_slack(message, state.get("repository", ""))
+    outcome = "Sent" if slack_message["status"] == "sent" else "Failed to send"
+    new_result = state.get("result", "") + f"\n\n[Action Taken] {outcome} Slack notification. {jira_status}"
+
     return {"result": new_result, "slack_message": slack_message}
 
 def route_jira_decision(state: AgentState):

@@ -122,92 +122,134 @@ export async function runAgent(
       signal
     });
 
-    if (!response.ok) throw new Error("Backend agent failed");
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
     
-    const data = await response.json();
-    const state = data.state;
+    let state: any = {};
     
-    if (aborted()) return;
+    if (reader) {
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ""; // Keep the incomplete line in buffer
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            if (!dataStr.trim()) continue;
+            try {
+              const output = JSON.parse(dataStr);
+              // output is like {"node_name": {"state_updates"}}
+              const nodeName = Object.keys(output)[0];
+              const nodeUpdates = output[nodeName];
+              
+              // Merge updates into state
+              state = { ...state, ...nodeUpdates };
+              
+              if (aborted()) return;
 
-    // Understand step
-    step("understand", "completed", "Goal analyzed by AI", 1000);
+              // Emit events based on the node that just completed
+              if (nodeName === "understand_request") {
+                step("understand", "completed", "Goal analyzed by AI", 1000);
+                step("github", "running");
+                emit({ type: "activity", activity: { id: nextId(), tool: "GitHub", status: "success", message: `Fetched issues via Swytchcode` } });
+              } else if (nodeName === "fetch_github_issues") {
+                const backendIssues = state.github_issues || [];
+                const issues: Issue[] = backendIssues.map((i: any) => {
+                  const labels = (i.labels || []).map((l: any) => typeof l === 'string' ? l : l.name);
+                  let severity = "low";
+                  if (labels.includes("critical")) severity = "critical";
+                  else if (labels.includes("high")) severity = "high";
+                  else if (labels.includes("medium")) severity = "medium";
+                  else if (labels.includes("low")) severity = "low";
 
-    // GitHub
-    step("github", "running");
-    emit({ type: "activity", activity: { id: nextId(), tool: "GitHub", status: "success", message: `Fetched issues via Swytchcode` } });
-    
-    // Map github_issues from state
-    const backendIssues = state.github_issues || [];
-    const issues: Issue[] = backendIssues.map((i: any) => {
-      const labels = (i.labels || []).map((l: any) => typeof l === 'string' ? l : l.name);
-      let severity = "low";
-      if (labels.includes("critical")) severity = "critical";
-      else if (labels.includes("high")) severity = "high";
-      else if (labels.includes("medium")) severity = "medium";
-      else if (labels.includes("low")) severity = "low";
+                  return {
+                    id: String(i.id),
+                    number: i.number,
+                    title: i.title,
+                    state: i.state,
+                    createdAt: i.created_at,
+                    severity: severity as Severity,
+                    priority: severity as Severity,
+                    recommendation: "Needs triage",
+                    labels: labels,
+                    analysis: {
+                      summary: i.body ? i.body.substring(0, 150) + "..." : "No description provided.",
+                      impact: severity === "critical" || severity === "high" ? "high" : "low",
+                      confidence: 85,
+                      whyItMatters: "Affects system reliability or user experience.",
+                      recommendedAction: "Review and prioritize appropriately."
+                    },
+                    url: i.html_url,
+                    assignee: i.user?.login
+                  };
+                });
+                emit({ type: "issues", issues });
+                step("github", "completed", `${issues.length} issues fetched`, 1500);
+                step("analyze", "running");
+              } else if (nodeName === "analyze_issues") {
+                step("analyze", "completed", "AI analyzed repository bugs", 3000);
+                emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "AI analysis completed" } });
+                step("prioritize", "completed", "Issues prioritized", 500);
+                step("decide", "running");
+              } else if (nodeName === "decide_actions") {
+                step("decide", "completed", state.decision === "YES" ? "Decided to create Jira ticket" : "Decided to skip Jira", 1000);
+                
+                // Add decision dynamically
+                const firstIssue = state.github_issues?.[0];
+                if (firstIssue) {
+                  emit({ 
+                    type: "selection", 
+                    decisions: [{
+                      issueNumber: firstIssue.number || 1,
+                      title: firstIssue.title || "Unknown Issue",
+                      reason: state.decision === "YES" ? "Issue prioritized for Jira tracking based on analysis." : "Issue deemed non-critical; skipping Jira.",
+                      actions: state.decision === "YES" ? ["Create Jira Ticket", "Notify Slack"] : ["Notify Slack"]
+                    }] 
+                  });
+                }
 
-      return {
-        id: String(i.id),
-        number: i.number,
-        title: i.title,
-        state: i.state,
-        createdAt: i.created_at,
-        severity: severity as Severity,
-        priority: severity as Severity,
-        recommendation: "Needs triage",
-        labels: labels,
-        analysis: {
-          summary: i.body ? i.body.substring(0, 150) + "..." : "No description provided.",
-          impact: severity === "critical" || severity === "high" ? "high" : "low",
-          confidence: 85,
-          whyItMatters: "Affects system reliability or user experience.",
-          recommendedAction: "Review and prioritize appropriately."
-        },
-        url: i.html_url,
-        assignee: i.user?.login
-      };
-    });
-    
-    emit({ type: "issues", issues });
-    step("github", "completed", `${issues.length} issues fetched`, 1500);
-
-    // Analyze
-    step("analyze", "completed", "AI analyzed repository bugs", 3000);
-    emit({ type: "timeline", event: { id: nextId(), time: clock(), label: "AI analysis completed: " + (state.decision || "") } });
-    
-    // Decide & Prioritize
-    step("prioritize", "completed", "Issues prioritized", 500);
-    step("decide", "completed", state.decision === "YES" ? "Decided to create Jira ticket" : "Decided to skip Jira", 1000);
-
-    // Jira
-    if (state.jira_created) {
-      step("jira", "completed", "Jira ticket created", 1500);
-      emit({ type: "activity", activity: { id: nextId(), tool: "Jira", status: "success", message: "Created tracking ticket" } });
-      if (state.jira_key) {
-        emit({ type: "jira", tasks: [{
-          key: state.jira_key,
-          title: state.jira_summary || "AI Tracked Bug",
-          priority: "critical",
-          status: "To Do",
-          assignee: "Unassigned",
-          issueType: "",
-          createdAt: new Date().toISOString(),
-          url: state.jira_url || "#",
-        }]});
+                if (state.decision === "YES") {
+                  step("jira", "running");
+                } else {
+                  step("jira", "skipped", "Jira not needed based on analysis");
+                  step("slack", "running");
+                }
+              } else if (nodeName === "create_jira") {
+                step("jira", "completed", "Jira ticket created", 1500);
+                emit({ type: "activity", activity: { id: nextId(), tool: "Jira", status: "success", message: "Created tracking ticket" } });
+                if (state.jira_key) {
+                  emit({ type: "jira", tasks: [{
+                    key: state.jira_key,
+                    title: state.jira_summary || "AI Tracked Bug",
+                    priority: "critical",
+                    status: "To Do",
+                    assignee: "Unassigned",
+                    issueType: "",
+                    createdAt: new Date().toISOString(),
+                    url: state.jira_url || "#",
+                  }]});
+                }
+                step("slack", "running");
+              } else if (nodeName === "send_slack") {
+                const slackFailed = state.slack_message?.status === "failed";
+                step("slack", slackFailed ? "failed" : "completed", slackFailed ? "Slack notification failed" : "Slack notified", 1000);
+                if (state.slack_message) emit({ type: "slack", messages: [state.slack_message] });
+                step("verify", "completed", "Workflow verified", 500);
+                step("done", "completed", "Agent finished");
+                emit({ type: "status", message: "Agent completed" });
+              }
+            } catch (e) {
+              console.error("Failed to parse SSE line", e);
+            }
+          }
+        }
       }
-    } else {
-      step("jira", "skipped", "Jira not needed based on analysis");
     }
-
-    // Slack
-    const slackFailed = state.slack_message?.status === "failed";
-    step("slack", slackFailed ? "failed" : "completed", slackFailed ? "Slack notification failed" : "Slack notified", 1000);
-    if (state.slack_message) emit({ type: "slack", messages: [state.slack_message] });
-
-    // Done
-    step("verify", "completed", "Workflow verified", 500);
-    step("done", "completed", "Agent finished");
-    emit({ type: "status", message: "Agent completed" });
 
   } catch (err) {
     console.error(err);

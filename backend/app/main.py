@@ -8,12 +8,14 @@ from app.graph.graph import graph
 from app.api.integrations import router as integrations_router
 from app.api.jira import router as jira_router
 from app.api.slack import router as slack_router
+from app.api.review import router as review_router
 
 
 app = FastAPI()
 app.include_router(integrations_router)
 app.include_router(jira_router)
 app.include_router(slack_router)
+app.include_router(review_router)
 
 
 class AgentRequest(BaseModel):
@@ -106,14 +108,17 @@ async def get_repositories():
 
 @app.post("/api/agent/run")
 def run_agent(request: AgentRequest):
+    from fastapi.responses import StreamingResponse
+    import json
 
-    result = graph.invoke({
-        "user_request": request.prompt,
-        "repository": request.repository or "",
-        "result": ""
-    })
+    def event_stream():
+        for output in graph.stream(
+            {
+                "user_request": request.prompt,
+                "repository": request.repository or "",
+                "result": ""
+            }
+        ):
+            yield f"data: {json.dumps(output)}\n\n"
 
-    return {
-        "success": True,
-        "state": result
-    }
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
